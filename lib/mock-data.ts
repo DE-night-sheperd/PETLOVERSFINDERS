@@ -93,4 +93,27 @@ export const dogListings: DogListing[] = [
     story:
       "He has been well socialized and enjoys spending time outdoors with his people. A confident and devoted companion.",
   },
+  {
+    id: "dog-5",
+    name: "Nala",
+    breed: "Cocker Spaniel Mix",
+    age_months: 14,
+    color: "Golden",
+    gender: "Female",
+    size: "Medium",
+    location: "Kimberley",
+    listing_price_zar: 1325,
+    status: "active",
+    primary_image:
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=80",
+    gallery: [
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=600&q=80",
+    ],
+    description:
+      "Nala is a cheerful, affectionate dog who thrives on connection and enjoys a calm, loving home.",
+    story:
+      "She is gentle with people, enjoys short walks, and adapts well to a family environment with consistent routines.",
+  },
 ];

@@ -63,6 +63,7 @@ export default function DogsPage() {
             <option>Johannesburg</option>
             <option>Cape Town</option>
             <option>Pretoria</option>
+            <option>Kimberley</option>
           </select>
         </div>
       </div>
