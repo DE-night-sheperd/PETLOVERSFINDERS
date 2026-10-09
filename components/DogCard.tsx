@@ -30,15 +30,9 @@ export function DogCard({ dog }: { dog: DogListing }) {
           {dog.location}
         </div>
 
-        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-          <div>
-            <div className="text-xs uppercase tracking-[0.12em] text-slate-500">Adoption fee</div>
-            <div className="mt-1 text-xl font-bold text-slate-900">R {dog.listing_price_zar.toLocaleString("en-ZA")}</div>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            PLF reviewed
-          </div>
+        <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 border-t border-slate-100 pt-4">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          PLF reviewed
         </div>
       </div>
     </Link>
