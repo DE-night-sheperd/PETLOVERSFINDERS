@@ -1,70 +1,88 @@
+import Link from "next/link";
+import { ShieldCheck, Lock, ArrowLeft } from "lucide-react";
+
 export const metadata = {
-  title: "Terms of Service - petLoversFinders",
-  description: "Terms and conditions for using petLoversFinders",
+  title: "Terms of Service | petLoversFinders South Africa",
+  description: "Terms and conditions governing the PLF middleman pet rehoming network and escrow trust.",
 };
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-slate-900 mb-8">Terms of Service</h1>
+    <div className="min-h-screen bg-slate-50 py-12">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <Link
+          href="/"
+          className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Home</span>
+        </Link>
 
-        <div className="prose prose-slate max-w-none space-y-6">
-          <section className="bg-white rounded-2xl p-8 border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">1. Acceptance of Terms</h2>
-            <p className="text-slate-600 leading-relaxed">
-              By accessing and using petLoversFinders, you accept and agree to be bound by the terms and provision of this agreement.
+        <div className="rounded-3xl border border-slate-200/90 bg-white p-8 sm:p-12 shadow-xs space-y-8">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-brand-700">
+              Legal Framework
+            </span>
+            <h1 className="mt-1 text-3xl font-extrabold text-slate-900">Terms of Service</h1>
+            <p className="mt-2 text-xs sm:text-sm text-slate-500">
+              Effective Date: 29 October 2026 • Governing Law: Republic of South Africa
             </p>
-          </section>
+          </div>
 
-          <section className="bg-white rounded-2xl p-8 border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">2. Use License</h2>
-            <p className="text-slate-600 leading-relaxed">
-              Permission is granted to temporarily download one copy of the materials (information or software) on petLoversFinders for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
-            </p>
-            <ul className="list-disc list-inside text-slate-600 space-y-2 mt-4">
-              <li>Modify or copy the materials</li>
-              <li>Use the materials for any commercial purpose or for any public display</li>
-              <li>Attempt to decompile or reverse engineer any software</li>
-              <li>Remove any copyright or other proprietary notations</li>
-              <li>Transfer the materials to another person or "mirror" the materials</li>
-            </ul>
-          </section>
+          <div className="space-y-6 text-sm text-slate-600 leading-relaxed">
+            <section className="space-y-2">
+              <h2 className="text-base font-bold text-slate-900">1. The PLF Middleman Model</h2>
+              <p>
+                petLoversFinders (Pty) Ltd ("PLF") operates exclusively as a trusted intermediary between
+                rehomers and adopters. To prevent scams, stolen animal trafficking, and unsafe breeding,
+                all communications, listing reviews, escrow custody, and veterinary voucher validations
+                must be conducted through the PLF platform.
+              </p>
+            </section>
 
-          <section className="bg-white rounded-2xl p-8 border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">3. Disclaimer</h2>
-            <p className="text-slate-600 leading-relaxed">
-              The materials on petLoversFinders are provided on an 'as is' basis. petLoversFinders makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
-            </p>
-          </section>
+            <section className="space-y-2">
+              <h2 className="text-base font-bold text-slate-900">2. Central Escrow Trust Protocol</h2>
+              <p>
+                Adopters must deposit the agreed adoption fee into the central PLF Escrow Trust Account.
+                Funds are strictly held in custody and are not released to the rehomer until:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-slate-600">
+                <li>Pre-handover SAVC veterinary check has been completed.</li>
+                <li>Admin verifies the official health clearance certificate.</li>
+                <li>Both parties confirm safe physical handover.</li>
+              </ul>
+              <p>
+                If a dog fails the SAVC veterinary health examination or if the rehomer fails handover
+                commitments, the adopter receives a 100% refund of their escrow deposit.
+              </p>
+            </section>
 
-          <section className="bg-white rounded-2xl p-8 border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">4. Limitations</h2>
-            <p className="text-slate-600 leading-relaxed">
-              In no event shall petLoversFinders or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on petLoversFinders.
-            </p>
-          </section>
+            <section className="space-y-2">
+              <h2 className="text-base font-bold text-slate-900">3. Prohibition of Direct Cash Payments</h2>
+              <p>
+                Users agree not to bypass PLF by requesting or transmitting unverified cash, direct bank
+                wires, or cryptocurrency outside the platform. Attempting to bypass the escrow trust
+                invalidates health guarantees and results in immediate profile suspension.
+              </p>
+            </section>
 
-          <section className="bg-white rounded-2xl p-8 border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">5. Accuracy of Materials</h2>
-            <p className="text-slate-600 leading-relaxed">
-              The materials appearing on petLoversFinders could include technical, typographical, or photographic errors. petLoversFinders does not warrant that any of the materials on its website are accurate, complete, or current. petLoversFinders may make changes to the materials contained on its website at any time without notice.
-            </p>
-          </section>
+            <section className="space-y-2">
+              <h2 className="text-base font-bold text-slate-900">4. Veterinary Health Vouchers</h2>
+              <p>
+                PLF provides a 15% discount voucher for pre-handover health checks redeemable at
+                accredited South African Veterinary Council (SAVC) registered clinics. Rehomers are
+                obligated to present the animal for examination and submit official stamped documentation.
+              </p>
+            </section>
 
-          <section className="bg-white rounded-2xl p-8 border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">6. Modifications</h2>
-            <p className="text-slate-600 leading-relaxed">
-              petLoversFinders may revise these terms of service for its website at any time without notice. By using this website, you are agreeing to be bound by the then current version of these terms of service.
-            </p>
-          </section>
-
-          <section className="bg-white rounded-2xl p-8 border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">7. Governing Law</h2>
-            <p className="text-slate-600 leading-relaxed">
-              These terms and conditions are governed by and construed in accordance with the laws of South Africa, and you irrevocably submit to the exclusive jurisdiction of the courts in that location.
-            </p>
-          </section>
+            <section className="space-y-2">
+              <h2 className="text-base font-bold text-slate-900">5. Governing Law and Jurisdiction</h2>
+              <p>
+                These terms are governed by the laws of South Africa. Any disputes arising in connection
+                with these terms shall be subject to the exclusive jurisdiction of the South African courts.
+              </p>
+            </section>
+          </div>
         </div>
       </div>
     </div>
