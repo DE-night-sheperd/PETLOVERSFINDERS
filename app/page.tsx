@@ -16,13 +16,15 @@ import {
   Coins,
   ChevronRight,
   Award,
+  Heart,
+  Utensils,
 } from "lucide-react";
 import { DogCard } from "@/components/DogCard";
 import { usePLFStore } from "@/lib/store";
 
 export default function HomePage() {
   const router = useRouter();
-  const { dogs } = usePLFStore();
+  const { dogs, donationPoolStats } = usePLFStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("All");
@@ -339,6 +341,89 @@ export default function HomePage() {
               Browse Complete Catalog
               <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* The Bark Back Community Fund: Feed & Vaccinate */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 py-16 sm:py-20 text-white shadow-lg">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7 space-y-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold text-white backdrop-blur-md">
+                <Heart className="h-3.5 w-3.5 fill-white text-white" />
+                <span>The Bark Back Community Fund</span>
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+                Donate as little as you have to bring a bark back to a friendly soul.
+              </h2>
+              <p className="text-sm sm:text-base text-amber-100 max-w-xl leading-relaxed">
+                Every rand goes directly toward nutritious meals for rescue fosters and subsidizing
+                vital SAVC Rabies and 5-in-1 vaccinations for indigent South African pet parents.
+              </p>
+
+              <div className="grid grid-cols-3 gap-3 pt-2 text-slate-900 max-w-lg">
+                <div className="rounded-2xl bg-white p-3.5 text-center shadow-xs">
+                  <span className="text-xl sm:text-2xl font-extrabold block text-amber-600">
+                    R {donationPoolStats.total_donated_zar.toLocaleString("en-ZA")}
+                  </span>
+                  <span className="text-[10px] sm:text-xs text-slate-500 font-bold">Total Donated</span>
+                </div>
+                <div className="rounded-2xl bg-white p-3.5 text-center shadow-xs">
+                  <span className="text-xl sm:text-2xl font-extrabold block text-emerald-600">
+                    {donationPoolStats.meals_funded_count}
+                  </span>
+                  <span className="text-[10px] sm:text-xs text-slate-500 font-bold">Meals Funded</span>
+                </div>
+                <div className="rounded-2xl bg-white p-3.5 text-center shadow-xs">
+                  <span className="text-xl sm:text-2xl font-extrabold block text-purple-600">
+                    {donationPoolStats.vaccinations_funded_count}
+                  </span>
+                  <span className="text-[10px] sm:text-xs text-slate-500 font-bold">Vaccines Funded</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 rounded-3xl bg-slate-950/80 p-6 sm:p-8 backdrop-blur-md border border-white/10 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  How You Can Help
+                </span>
+                <span className="text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 px-2 py-0.5 font-bold border border-emerald-500/30">
+                  100% Direct Allocation
+                </span>
+              </div>
+
+              <div className="space-y-3 text-xs text-slate-300">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>R 25</strong> feeds 1 rescued foster dog for a full day.</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>R 350</strong> pays for a full SAVC Rabies + 5-in-1 vaccination course.</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>Strict anti-fraud criteria prevent duplicate or fraudulent claims.</span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                <Link
+                  href="/donate"
+                  className="flex-1 text-center rounded-2xl bg-white py-3 text-xs font-bold text-slate-900 shadow-xs hover:bg-amber-50"
+                >
+                  Donate to Feed & Vaccinate
+                </Link>
+                <Link
+                  href="/vaccine-incentive"
+                  className="flex-1 text-center rounded-2xl border border-white/30 py-3 text-xs font-bold text-white hover:bg-white/10"
+                >
+                  Apply for Vaccine Subsidy
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

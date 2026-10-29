@@ -15,6 +15,8 @@ import {
   User,
   ShieldAlert,
   Sparkles,
+  Stethoscope,
+  Utensils,
 } from "lucide-react";
 import { usePLFStore } from "@/lib/store";
 
@@ -29,15 +31,18 @@ export function Navbar() {
     switchPersona,
     applications,
     dogs,
+    vaccineIncentives,
   } = usePLFStore();
 
   const pendingAdminCount =
     dogs.filter((d) => d.status === "pending_review").length +
-    applications.filter((a) => a.status === "pending_admin").length;
+    applications.filter((a) => a.status === "pending_admin").length +
+    vaccineIncentives.filter((i) => i.status === "pending_review").length;
 
   const navLinks = [
     { label: "Browse Dogs", href: "/dogs", icon: Dog },
     { label: "List a Dog", href: "/rehomer/new-dog", icon: PlusCircle },
+    { label: "Vaccine Subsidy", href: "/vaccine-incentive", icon: Stethoscope },
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     {
       label: "Admin Portal",
@@ -49,11 +54,13 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all">
-      {/* Top Banner Notice for middleman model */}
+      {/* Top Banner Notice for middleman model & Bark Back Fund */}
       <div className="bg-slate-900 px-4 py-1.5 text-center text-xs font-medium text-slate-300">
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-          <span>South Africa's Trusted Middleman Pet Rehoming — 100% Escrow Protected & SAVC Vet Cleared</span>
+          <span>
+            South Africa's Trusted Middleman Pet Network — Escrow Protection & Community-Funded SAVC Vaccines
+          </span>
         </span>
       </div>
 
@@ -71,29 +78,30 @@ export function Navbar() {
                 ZA
               </span>
             </div>
-            <span className="text-[10px] font-medium text-slate-400">Escrow & Vet Protected</span>
+            <span className="text-[10px] font-medium text-slate-400">Escrow & Bark Back Fund</span>
           </div>
         </Link>
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+            const isActive =
+              pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
             const Icon = link.icon;
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition ${
+                className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition ${
                   isActive
                     ? "bg-brand-50 text-brand-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${isActive ? "text-brand-600" : "text-slate-400"}`} />
+                <Icon className={`h-3.5 w-3.5 ${isActive ? "text-brand-600" : "text-slate-400"}`} />
                 <span>{link.label}</span>
                 {link.badge && (
-                  <span className="ml-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white shadow-xs">
+                  <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[9px] font-bold text-white shadow-xs">
                     {link.badge}
                   </span>
                 )}
@@ -102,16 +110,30 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Right Section: Favorites + Interactive Persona Switcher */}
+        {/* Right Section: Donate Button + Favorites + Persona Switcher */}
         <div className="hidden md:flex items-center gap-3">
+          {/* Highlighted Donate Button */}
+          <Link
+            href="/donate"
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:from-amber-600 hover:to-amber-700 hover:shadow-soft"
+          >
+            <Heart className="h-3.5 w-3.5 fill-white" />
+            <span>Donate & Feed</span>
+          </Link>
+
           {/* Wishlist / Favorites Pill */}
           <Link
             href="/dashboard?tab=favorites"
             className="group flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:border-rose-300 hover:bg-rose-50"
             title="View saved dogs"
           >
-            <Heart className={`h-4 w-4 ${favorites.length > 0 ? "fill-rose-500 text-rose-500" : "text-slate-400 group-hover:text-rose-500"}`} />
-            <span>Saved</span>
+            <Heart
+              className={`h-4 w-4 ${
+                favorites.length > 0
+                  ? "fill-rose-500 text-rose-500"
+                  : "text-slate-400 group-hover:text-rose-500"
+              }`}
+            />
             <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-700 group-hover:bg-rose-100 group-hover:text-rose-700">
               {favorites.length}
             </span>
@@ -128,7 +150,7 @@ export function Navbar() {
                 alt={currentUser.name}
                 className="h-6 w-6 rounded-full object-cover border border-slate-200"
               />
-              <span className="max-w-[110px] truncate">{currentUser.name}</span>
+              <span className="max-w-[100px] truncate">{currentUser.name}</span>
               <span
                 className={`rounded-full px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wider ${
                   currentUser.role === "admin"
@@ -215,6 +237,14 @@ export function Navbar() {
 
                 <div className="mt-2 pt-2 border-t border-slate-100 flex flex-col gap-1">
                   <Link
+                    href="/donate"
+                    onClick={() => setRoleMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-amber-700 font-semibold hover:bg-amber-50"
+                  >
+                    <Heart className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                    <span>Donate to Bark Back Fund</span>
+                  </Link>
+                  <Link
                     href="/profile"
                     onClick={() => setRoleMenuOpen(false)}
                     className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
@@ -239,6 +269,13 @@ export function Navbar() {
         {/* Mobile menu trigger */}
         <div className="flex items-center gap-2 md:hidden">
           <Link
+            href="/donate"
+            className="flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1.5 text-xs font-bold text-white"
+          >
+            <Heart className="h-3.5 w-3.5 fill-white" />
+            <span>Donate</span>
+          </Link>
+          <Link
             href="/dashboard?tab=favorites"
             className="flex items-center gap-1 rounded-full border border-slate-200 bg-white p-2 text-slate-700"
           >
@@ -259,6 +296,15 @@ export function Navbar() {
       {isOpen && (
         <div className="border-b border-slate-200 bg-white px-4 pt-3 pb-6 md:hidden">
           <div className="space-y-1">
+            <Link
+              href="/donate"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-bold text-white shadow-xs"
+            >
+              <Heart className="h-4 w-4 fill-white" />
+              <span>Donate to Feed & Vaccinate Dogs</span>
+            </Link>
+
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -294,7 +340,9 @@ export function Navbar() {
                   setIsOpen(false);
                 }}
                 className={`rounded-xl p-2 text-center text-xs font-semibold ${
-                  currentUser.role === "adopter" ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700"
+                  currentUser.role === "adopter"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-slate-100 text-slate-700"
                 }`}
               >
                 Adopter
@@ -305,7 +353,9 @@ export function Navbar() {
                   setIsOpen(false);
                 }}
                 className={`rounded-xl p-2 text-center text-xs font-semibold ${
-                  currentUser.role === "rehomer" ? "bg-blue-100 text-blue-800" : "bg-slate-100 text-slate-700"
+                  currentUser.role === "rehomer"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-slate-100 text-slate-700"
                 }`}
               >
                 Rehomer
@@ -316,7 +366,9 @@ export function Navbar() {
                   setIsOpen(false);
                 }}
                 className={`rounded-xl p-2 text-center text-xs font-semibold ${
-                  currentUser.role === "admin" ? "bg-purple-100 text-purple-800" : "bg-slate-100 text-slate-700"
+                  currentUser.role === "admin"
+                    ? "bg-purple-100 text-purple-800"
+                    : "bg-slate-100 text-slate-700"
                 }`}
               >
                 Admin

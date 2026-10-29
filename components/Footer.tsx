@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck, Heart, RotateCcw, Lock, ExternalLink } from "lucide-react";
+import { ShieldCheck, Heart, RotateCcw, Lock, ExternalLink, Utensils, Stethoscope } from "lucide-react";
 import { usePLFStore } from "@/lib/store";
 
 export function Footer() {
@@ -10,26 +10,26 @@ export function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white text-slate-600">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand info */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-3">
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl">🐕</span>
               <span className="text-xl font-extrabold tracking-tight text-slate-900">
                 petLovers<span className="text-brand-600">Finders</span>
               </span>
             </Link>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-500">
-              South Africa's dedicated middleman rehoming platform. We protect pets and adopters
-              with central escrow payments, pre-handover SAVC veterinary vouchers, and strict identity
-              vetting.
+            <p className="max-w-sm text-xs sm:text-sm leading-relaxed text-slate-500">
+              South Africa's dedicated middleman rehoming platform & community welfare fund. We protect
+              pets with central escrow custody, pre-handover SAVC veterinary vouchers, and the
+              community-backed <strong>Bark Back Feed & Vaccinate Fund</strong>.
             </p>
-            <div className="mt-4 flex items-center gap-3 text-xs text-slate-500">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-1">
               <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
                 <ShieldCheck className="h-3.5 w-3.5" /> 100% Escrow Safe
               </span>
-              <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-semibold text-blue-700">
-                <Lock className="h-3.5 w-3.5" /> POPIA Compliant
+              <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 font-semibold text-amber-800">
+                <Heart className="h-3.5 w-3.5 fill-amber-500 text-amber-500" /> Bark Back Fund
               </span>
             </div>
           </div>
@@ -37,7 +37,7 @@ export function Footer() {
           {/* Adoption Links */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Adoption</h4>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="mt-4 space-y-2 text-xs sm:text-sm">
               <li>
                 <Link href="/dogs" className="hover:text-brand-600 transition">
                   Browse Available Dogs
@@ -61,10 +61,30 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Rehoming & Vets */}
+          {/* Bark Back Fund & Rehoming */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Rehomers & Vets</h4>
-            <ul className="mt-4 space-y-2 text-sm">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800">
+              Bark Back Fund
+            </h4>
+            <ul className="mt-4 space-y-2 text-xs sm:text-sm">
+              <li>
+                <Link
+                  href="/donate"
+                  className="font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1.5"
+                >
+                  <Heart className="h-3 w-3 fill-amber-500 text-amber-500" />
+                  <span>Donate & Feed Dogs</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/vaccine-incentive"
+                  className="text-purple-700 font-semibold hover:text-purple-800 flex items-center gap-1.5"
+                >
+                  <Stethoscope className="h-3 w-3" />
+                  <span>Vaccine Subsidy Grant</span>
+                </Link>
+              </li>
               <li>
                 <Link href="/rehomer/new-dog" className="hover:text-brand-600 transition">
                   List a Dog for Rehoming
@@ -75,23 +95,13 @@ export function Footer() {
                   My Dog Listings
                 </Link>
               </li>
-              <li>
-                <Link href="/rehomer/voucher/dog-1" className="hover:text-brand-600 transition">
-                  Vet Voucher Portal
-                </Link>
-              </li>
-              <li>
-                <Link href="/rehomer/upload-clearance/dog-1" className="hover:text-brand-600 transition">
-                  Upload Vet Clearance
-                </Link>
-              </li>
             </ul>
           </div>
 
           {/* Platform & Governance */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">Governance</h4>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="mt-4 space-y-2 text-xs sm:text-sm">
               <li>
                 <Link href="/admin" className="font-semibold text-brand-600 hover:text-brand-700 transition">
                   PLF Admin Portal
@@ -124,7 +134,7 @@ export function Footer() {
             <button
               onClick={resetToDefaults}
               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-              title="Reset all listings and state back to fresh demo seed"
+              title="Reset all listings, donations, and state back to fresh demo seed"
             >
               <RotateCcw className="h-3 w-3" />
               <span>Reset Demo State</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import type {
   DogListing,
   AdoptionApplication,
@@ -10,6 +10,10 @@ import type {
   UserProfile,
   ToastMessage,
   ApplicationStatus,
+  Donation,
+  VaccineIncentiveApplication,
+  IncentiveStatus,
+  DonationPoolStats,
 } from "@/lib/types";
 import {
   initialDogListings,
@@ -18,6 +22,8 @@ import {
   initialVouchers,
   initialClearances,
   demoPersonas,
+  initialDonations,
+  initialVaccineIncentives,
 } from "@/lib/mock-data";
 
 interface PLFStoreContextType {
@@ -29,6 +35,10 @@ interface PLFStoreContextType {
   favorites: string[];
   currentUser: UserProfile;
   toasts: ToastMessage[];
+  donations: Donation[];
+  vaccineIncentives: VaccineIncentiveApplication[];
+  donationPoolStats: DonationPoolStats;
+
   // Actions
   addDog: (dog: Omit<DogListing, "id" | "created_at" | "views" | "likes">) => DogListing;
   updateDogStatus: (dogId: string, status: DogListing["status"]) => void;
@@ -38,7 +48,10 @@ interface PLFStoreContextType {
     data: Omit<AdoptionApplication, "id" | "submitted_at" | "status" | "escrow_deposit_zar">
   ) => AdoptionApplication;
   updateApplicationStatus: (appId: string, status: ApplicationStatus, notes?: string) => void;
-  payEscrow: (appId: string, paymentMethod: "PayFast" | "Ozow Instant EFT" | "Debit / Credit Card") => EscrowTransaction | null;
+  payEscrow: (
+    appId: string,
+    paymentMethod: "PayFast" | "Ozow Instant EFT" | "Debit / Credit Card"
+  ) => EscrowTransaction | null;
   releaseEscrow: (escrowId: string) => void;
   submitVetClearance: (data: Omit<VetClearance, "id" | "submitted_at" | "verified">) => VetClearance;
   verifyVetClearance: (clearanceId: string) => void;
@@ -47,11 +60,24 @@ interface PLFStoreContextType {
   addToast: (type: ToastMessage["type"], title: string, message: string) => void;
   dismissToast: (id: string) => void;
   resetToDefaults: () => void;
+
+  // Donation & Vaccine Incentive Actions
+  addDonation: (
+    data: Omit<Donation, "id" | "created_at" | "transaction_ref">
+  ) => Donation;
+  submitVaccineIncentive: (
+    data: Omit<VaccineIncentiveApplication, "id" | "submitted_at" | "status" | "subsidy_amount_zar">
+  ) => VaccineIncentiveApplication;
+  reviewVaccineIncentive: (
+    appId: string,
+    status: IncentiveStatus,
+    adminNotes?: string
+  ) => void;
 }
 
 const PLFStoreContext = createContext<PLFStoreContextType | null>(null);
 
-const STORAGE_KEY = "PLF_APP_STORAGE_V1";
+const STORAGE_KEY = "PLF_APP_STORAGE_V2";
 
 export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -63,6 +89,10 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>(["dog-1", "dog-3"]);
   const [currentUser, setCurrentUser] = useState<UserProfile>(demoPersonas[0]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [donations, setDonations] = useState<Donation[]>(initialDonations);
+  const [vaccineIncentives, setVaccineIncentives] = useState<VaccineIncentiveApplication[]>(
+    initialVaccineIncentives
+  );
 
   // Load from local storage
   useEffect(() => {
@@ -77,6 +107,8 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
         if (parsed.clearances) setClearances(parsed.clearances);
         if (parsed.favorites) setFavorites(parsed.favorites);
         if (parsed.currentUser) setCurrentUser(parsed.currentUser);
+        if (parsed.donations) setDonations(parsed.donations);
+        if (parsed.vaccineIncentives) setVaccineIncentives(parsed.vaccineIncentives);
       }
     } catch (e) {
       console.warn("Could not load from localStorage:", e);
@@ -99,12 +131,25 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
           clearances,
           favorites,
           currentUser,
+          donations,
+          vaccineIncentives,
         })
       );
     } catch (e) {
       console.warn("Could not write to localStorage:", e);
     }
-  }, [dogs, applications, escrows, vouchers, clearances, favorites, currentUser, isHydrated]);
+  }, [
+    dogs,
+    applications,
+    escrows,
+    vouchers,
+    clearances,
+    favorites,
+    currentUser,
+    donations,
+    vaccineIncentives,
+    isHydrated,
+  ]);
 
   const addToast = useCallback(
     (type: ToastMessage["type"], title: string, message: string) => {
@@ -219,20 +264,30 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
         })
       );
 
-      // If approved, notify
       if (status === "approved") {
-        addToast("success", "Application Approved! 🎉", `Application ${appId} is approved. Escrow payment can now proceed.`);
+        addToast(
+          "success",
+          "Application Approved! 🎉",
+          `Application ${appId} is approved. Escrow payment can now proceed.`
+        );
       } else if (status === "rejected") {
         addToast("warning", "Application Declined", `Application ${appId} has been declined.`);
       } else {
-        addToast("info", "Application Status Updated", `Application ${appId} is now marked as "${status}".`);
+        addToast(
+          "info",
+          "Application Status Updated",
+          `Application ${appId} is now marked as "${status}".`
+        );
       }
     },
     [addToast]
   );
 
   const payEscrow = useCallback(
-    (appId: string, paymentMethod: "PayFast" | "Ozow Instant EFT" | "Debit / Credit Card") => {
+    (
+      appId: string,
+      paymentMethod: "PayFast" | "Ozow Instant EFT" | "Debit / Credit Card"
+    ) => {
       const app = applications.find((a) => a.id === appId);
       if (!app) return null;
 
@@ -252,22 +307,23 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
         status: "held_in_escrow",
         payment_method: paymentMethod,
         created_at: new Date().toISOString(),
-        transaction_ref: `TX-${Date.now().toString(36).toUpperCase()}-${paymentMethod.substring(0, 3).toUpperCase()}`,
+        transaction_ref: `TX-${Date.now().toString(36).toUpperCase()}-${paymentMethod
+          .substring(0, 3)
+          .toUpperCase()}`,
       };
 
       setEscrows((prev) => [newEscrow, ...prev]);
 
-      // Update application status
       setApplications((prev) =>
-        prev.map((a) => (a.id === appId ? { ...a, status: "deposit_paid" as ApplicationStatus } : a))
+        prev.map((a) =>
+          a.id === appId ? { ...a, status: "deposit_paid" as ApplicationStatus } : a
+        )
       );
 
-      // Update dog status to under_adoption
       setDogs((prev) =>
         prev.map((d) => (d.id === app.dog_id ? { ...d, status: "under_adoption" } : d))
       );
 
-      // Automatically issue Vet Voucher if not already issued
       const existingVoucher = vouchers.find((v) => v.dog_id === app.dog_id);
       if (!existingVoucher) {
         const newVoucher: VetVoucher = {
@@ -312,12 +368,10 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
         )
       );
 
-      // Update dog to adopted
       setDogs((prev) =>
         prev.map((d) => (d.id === escrow.dog_id ? { ...d, status: "adopted" } : d))
       );
 
-      // Update application to completed
       setApplications((prev) =>
         prev.map((a) => (a.id === escrow.application_id ? { ...a, status: "completed" } : a))
       );
@@ -325,7 +379,9 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
       addToast(
         "success",
         "Escrow Payout Released! 💸",
-        `R ${escrow.rehomer_payout_zar.toLocaleString("en-ZA")} disbursed to rehomer. Adoption finalized!`
+        `R ${escrow.rehomer_payout_zar.toLocaleString(
+          "en-ZA"
+        )} disbursed to rehomer. Adoption finalized!`
       );
     },
     [escrows, addToast]
@@ -342,17 +398,16 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
 
       setClearances((prev) => [newClearance, ...prev]);
 
-      // Update dog status
       setDogs((prev) =>
         prev.map((d) => (d.id === data.dog_id ? { ...d, status: "vet_cleared" } : d))
       );
 
-      // Update voucher status
       setVouchers((prev) =>
-        prev.map((v) => (v.dog_id === data.dog_id ? { ...v, status: "clearance_submitted" } : v))
+        prev.map((v) =>
+          v.dog_id === data.dog_id ? { ...v, status: "clearance_submitted" } : v
+        )
       );
 
-      // Update applications
       setApplications((prev) =>
         prev.map((a) =>
           a.dog_id === data.dog_id && a.status === "deposit_paid"
@@ -381,12 +436,10 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
         prev.map((c) => (c.id === clearanceId ? { ...c, verified: true } : c))
       );
 
-      // Update voucher
       setVouchers((prev) =>
         prev.map((v) => (v.dog_id === clr.dog_id ? { ...v, status: "verified" } : v))
       );
 
-      // Update application to ready_handover
       setApplications((prev) =>
         prev.map((a) =>
           a.dog_id === clr.dog_id ? { ...a, status: "ready_handover" } : a
@@ -415,6 +468,139 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
     [addToast]
   );
 
+  // -------------------------------------------------------------
+  // DONATIONS & INCENTIVE LOGIC
+  // -------------------------------------------------------------
+
+  const addDonation = useCallback(
+    (data: Omit<Donation, "id" | "created_at" | "transaction_ref">) => {
+      const newDonation: Donation = {
+        ...data,
+        id: "DON-2026-" + Math.floor(1000 + Math.random() * 9000),
+        created_at: new Date().toISOString(),
+        transaction_ref:
+          "TX-DON-" +
+          Date.now().toString(36).toUpperCase() +
+          "-" +
+          data.payment_method.substring(0, 3).toUpperCase(),
+      };
+
+      setDonations((prev) => [newDonation, ...prev]);
+
+      const allocationLabel =
+        data.allocated_to === "meals"
+          ? "rescue meals"
+          : data.allocated_to === "vaccines"
+          ? "SAVC vaccinations"
+          : "meals and vaccinations";
+
+      addToast(
+        "success",
+        "Donation Received! 🐕❤️",
+        `Thank you ${
+          data.is_anonymous ? "Friend" : data.donor_name
+        }! R ${data.amount_zar.toLocaleString("en-ZA")} allocated to ${allocationLabel}.`
+      );
+
+      return newDonation;
+    },
+    [addToast]
+  );
+
+  const submitVaccineIncentive = useCallback(
+    (
+      data: Omit<
+        VaccineIncentiveApplication,
+        "id" | "submitted_at" | "status" | "subsidy_amount_zar"
+      >
+    ) => {
+      const newApp: VaccineIncentiveApplication = {
+        ...data,
+        id: "PLF-INC-" + Math.floor(1000 + Math.random() * 9000),
+        status: "pending_review",
+        subsidy_amount_zar: 350, // Standard R350 SAVC Rabies & 5-in-1 vaccination course
+        submitted_at: new Date().toISOString(),
+      };
+
+      setVaccineIncentives((prev) => [newApp, ...prev]);
+
+      addToast(
+        "success",
+        "Subsidy Application Received! 🩺",
+        `Application ${newApp.id} for ${data.pet_name} queued for strict means & anti-fraud verification.`
+      );
+
+      return newApp;
+    },
+    [addToast]
+  );
+
+  const reviewVaccineIncentive = useCallback(
+    (appId: string, status: IncentiveStatus, adminNotes?: string) => {
+      setVaccineIncentives((prev) =>
+        prev.map((app) => {
+          if (app.id === appId) {
+            const voucherCode =
+              status === "approved" || status === "voucher_issued"
+                ? `PLF-SUBSIDY-${app.pet_name.toUpperCase().replace(/\s+/g, "")}-${Math.floor(
+                    100 + Math.random() * 900
+                  )}`
+                : app.voucher_code;
+
+            return {
+              ...app,
+              status,
+              voucher_code: voucherCode,
+              ...(adminNotes ? { admin_notes: adminNotes } : {}),
+              reviewed_at: new Date().toISOString(),
+            };
+          }
+          return app;
+        })
+      );
+
+      if (status === "approved" || status === "voucher_issued") {
+        addToast(
+          "success",
+          "Vaccination Subsidy Approved! 🎉",
+          `Direct SAVC Clinic voucher issued for ${appId}. Non-cash credit authorized.`
+        );
+      } else if (status === "declined") {
+        addToast(
+          "warning",
+          "Subsidy Application Declined",
+          `Application ${appId} was declined based on anti-fraud / means criteria.`
+        );
+      }
+    },
+    [addToast]
+  );
+
+  // Compute live donation pool statistics
+  const donationPoolStats = useMemo<DonationPoolStats>(() => {
+    const totalDonated = donations.reduce((sum, d) => sum + d.amount_zar, 0);
+    const approvedGrantsCount = vaccineIncentives.filter(
+      (i) => i.status === "approved" || i.status === "voucher_issued" || i.status === "redeemed_at_clinic"
+    ).length;
+    const totalGrantsValue = approvedGrantsCount * 350;
+
+    const mealsPool = donations
+      .filter((d) => d.allocated_to === "meals" || d.allocated_to === "both")
+      .reduce((sum, d) => sum + (d.allocated_to === "both" ? d.amount_zar * 0.5 : d.amount_zar), 0);
+
+    const mealsCount = Math.floor(mealsPool / 25); // R25 feeds a rescue dog
+    const vaccinesCount = Math.floor(totalDonated / 350);
+    const remainingPool = Math.max(0, totalDonated - totalGrantsValue);
+
+    return {
+      total_donated_zar: totalDonated,
+      meals_funded_count: mealsCount,
+      vaccinations_funded_count: vaccinesCount,
+      active_grants_count: approvedGrantsCount,
+      remaining_pool_zar: remainingPool,
+    };
+  }, [donations, vaccineIncentives]);
+
   const resetToDefaults = useCallback(() => {
     setDogs(initialDogListings);
     setApplications(initialApplications);
@@ -423,6 +609,8 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
     setClearances(initialClearances);
     setFavorites(["dog-1", "dog-3"]);
     setCurrentUser(demoPersonas[0]);
+    setDonations(initialDonations);
+    setVaccineIncentives(initialVaccineIncentives);
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {}
@@ -440,6 +628,9 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
         favorites,
         currentUser,
         toasts,
+        donations,
+        vaccineIncentives,
+        donationPoolStats,
         addDog,
         updateDogStatus,
         toggleFavorite,
@@ -455,6 +646,9 @@ export function PLFStoreProvider({ children }: { children: React.ReactNode }) {
         addToast,
         dismissToast,
         resetToDefaults,
+        addDonation,
+        submitVaccineIncentive,
+        reviewVaccineIncentive,
       }}
     >
       {children}

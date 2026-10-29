@@ -124,3 +124,69 @@ export interface ToastMessage {
   title: string;
   message: string;
 }
+
+// -------------------------------------------------------------
+// DONATIONS & VACCINATION INCENTIVE SUBSIDY TYPES
+// -------------------------------------------------------------
+
+export type DonationAllocation = "both" | "vaccines" | "meals";
+
+export interface Donation {
+  id: string;
+  donor_name: string;
+  donor_email: string;
+  amount_zar: number;
+  allocated_to: DonationAllocation;
+  message: string;
+  is_anonymous: boolean;
+  payment_method: "PayFast" | "Ozow Instant EFT" | "SnapScan" | "Debit / Credit Card";
+  created_at: string;
+  transaction_ref: string;
+}
+
+export type IncentiveStatus =
+  | "pending_review"
+  | "approved"
+  | "voucher_issued"
+  | "redeemed_at_clinic"
+  | "declined";
+
+export type IncomeBracket =
+  | "sassa_recipient"
+  | "unemployed_affidavit"
+  | "low_income_under_8500"
+  | "pensioner_or_student";
+
+export interface VaccineIncentiveApplication {
+  id: string;
+  applicant_name: string;
+  sa_id_number: string; // 13-digit SA ID
+  applicant_email: string;
+  applicant_phone: string;
+  city: string;
+  residential_address: string;
+  income_bracket: IncomeBracket;
+  proof_of_income_doc: string;
+  proof_of_residence_doc: string;
+  pet_name: string;
+  pet_breed: string;
+  pet_age_months: number;
+  pet_photo_url: string;
+  preferred_partner_clinic: string;
+  hardship_reason: string;
+  subsidy_amount_zar: number; // e.g. R350 (Full Rabies + 5-in-1 vaccination package directly paid to vet)
+  voucher_code?: string;
+  status: IncentiveStatus;
+  anti_fraud_declaration: boolean;
+  admin_notes?: string;
+  submitted_at: string;
+  reviewed_at?: string;
+}
+
+export interface DonationPoolStats {
+  total_donated_zar: number;
+  meals_funded_count: number; // calculated e.g. R25/meal
+  vaccinations_funded_count: number; // calculated e.g. R350/vaccine
+  active_grants_count: number;
+  remaining_pool_zar: number;
+}

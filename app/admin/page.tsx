@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ShieldCheck,
+  ShieldAlert,
   FileText,
   Users,
   Coins,
@@ -19,6 +20,10 @@ import {
   ExternalLink,
   RotateCcw,
   Sparkles,
+  Heart,
+  AlertTriangle,
+  FileCheck,
+  Check,
 } from "lucide-react";
 import { usePLFStore } from "@/lib/store";
 
@@ -28,29 +33,33 @@ export default function AdminPage() {
     applications,
     escrows,
     clearances,
+    vaccineIncentives,
+    donationPoolStats,
     updateDogStatus,
     updateApplicationStatus,
     releaseEscrow,
     verifyVetClearance,
+    reviewVaccineIncentive,
     addToast,
     resetToDefaults,
   } = usePLFStore();
 
   const [activeTab, setActiveTab] = useState<
-    "listings" | "applications" | "escrow" | "clearances"
+    "listings" | "applications" | "escrow" | "clearances" | "incentives"
   >("listings");
   const [adminSearch, setAdminSearch] = useState("");
 
   // Derived statistics
   const pendingReviewDogs = dogs.filter((d) => d.status === "pending_review");
   const pendingApps = applications.filter((a) => a.status === "pending_admin");
+  const pendingClearances = clearances.filter((c) => !c.verified);
+  const pendingIncentives = vaccineIncentives.filter((i) => i.status === "pending_review");
   const escrowHeldTotal = escrows
     .filter((e) => e.status === "held_in_escrow")
     .reduce((sum, e) => sum + e.amount_zar, 0);
   const releasedTotal = escrows
     .filter((e) => e.status === "released_to_rehomer")
     .reduce((sum, e) => sum + e.rehomer_payout_zar, 0);
-  const pendingClearances = clearances.filter((c) => !c.verified);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -65,7 +74,7 @@ export default function AdminPage() {
             Operations Command Center
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Centralized admin workflow: review listings, vet applications, oversee escrow trust, and verify SAVC health clearances.
+            Review listings, vet applications, oversee escrow trust, and verify strict SAVC vaccine subsidy claims.
           </p>
         </div>
 
@@ -88,37 +97,43 @@ export default function AdminPage() {
       </div>
 
       {/* KPI Counters */}
-      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-6">
         {[
           {
             label: "Pending Listings",
             val: pendingReviewDogs.length,
             tab: "listings",
-            tone: "text-amber-600 bg-amber-50 border-amber-200",
+            tone: "text-amber-700 bg-amber-50 border-amber-200",
           },
           {
-            label: "Pending Applications",
+            label: "Adoptions Queue",
             val: pendingApps.length,
             tab: "applications",
-            tone: "text-blue-600 bg-blue-50 border-blue-200",
+            tone: "text-blue-700 bg-blue-50 border-blue-200",
           },
           {
-            label: "SAVC Clearances Queue",
+            label: "SAVC Clearances",
             val: pendingClearances.length,
             tab: "clearances",
-            tone: "text-purple-600 bg-purple-50 border-purple-200",
+            tone: "text-purple-700 bg-purple-50 border-purple-200",
           },
           {
-            label: "Escrow Held in Trust",
+            label: "Vaccine Grants Queue",
+            val: pendingIncentives.length,
+            tab: "incentives",
+            tone: "text-rose-700 bg-rose-50 border-rose-200",
+          },
+          {
+            label: "Escrow in Trust",
             val: `R ${escrowHeldTotal.toLocaleString("en-ZA")}`,
             tab: "escrow",
-            tone: "text-emerald-600 bg-emerald-50 border-emerald-200",
+            tone: "text-emerald-700 bg-emerald-50 border-emerald-200",
           },
           {
-            label: "Total Rehomer Payouts",
-            val: `R ${releasedTotal.toLocaleString("en-ZA")}`,
-            tab: "escrow",
-            tone: "text-slate-800 bg-slate-100 border-slate-200",
+            label: "Bark Back Fund",
+            val: `R ${donationPoolStats.total_donated_zar.toLocaleString("en-ZA")}`,
+            tab: "incentives",
+            tone: "text-amber-800 bg-amber-100/70 border-amber-300",
           },
         ].map((kpi) => (
           <button
@@ -126,22 +141,30 @@ export default function AdminPage() {
             onClick={() => setActiveTab(kpi.tab as any)}
             className={`rounded-2xl border p-4 text-left shadow-xs transition hover:scale-[1.02] ${kpi.tone}`}
           >
-            <span className="text-[11px] font-bold uppercase tracking-wider opacity-80 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider opacity-80 block truncate">
               {kpi.label}
             </span>
-            <span className="mt-1 text-2xl font-extrabold tracking-tight block">{kpi.val}</span>
+            <span className="mt-1 text-xl sm:text-2xl font-extrabold tracking-tight block truncate">
+              {kpi.val}
+            </span>
           </button>
         ))}
       </div>
 
       {/* Tab Navigation */}
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-2">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {[
             { id: "listings", label: "Listings Queue", count: pendingReviewDogs.length, icon: FileText },
-            { id: "applications", label: "Applications", count: pendingApps.length, icon: Users },
+            { id: "applications", label: "Adoptions Queue", count: pendingApps.length, icon: Users },
             { id: "escrow", label: "Escrow & Payouts", count: escrows.length, icon: Coins },
-            { id: "clearances", label: "SAVC Clearances", count: pendingClearances.length, icon: Stethoscope },
+            { id: "clearances", label: "Vet Clearances", count: pendingClearances.length, icon: Stethoscope },
+            {
+              id: "incentives",
+              label: "Vaccine Grants (Anti-Fraud)",
+              count: pendingIncentives.length,
+              icon: Heart,
+            },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -176,7 +199,7 @@ export default function AdminPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Search queue records..."
+            placeholder="Search records / SA ID..."
             value={adminSearch}
             onChange={(e) => setAdminSearch(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs focus:ring-2 focus:ring-brand-500"
@@ -197,7 +220,10 @@ export default function AdminPage() {
             <div className="divide-y divide-slate-100">
               {dogs
                 .filter((d) =>
-                  adminSearch ? d.name.toLowerCase().includes(adminSearch.toLowerCase()) || d.breed.toLowerCase().includes(adminSearch.toLowerCase()) : true
+                  adminSearch
+                    ? d.name.toLowerCase().includes(adminSearch.toLowerCase()) ||
+                      d.breed.toLowerCase().includes(adminSearch.toLowerCase())
+                    : true
                 )
                 .map((dog) => (
                   <div
@@ -228,10 +254,12 @@ export default function AdminPage() {
                           </span>
                         </div>
                         <div className="text-xs text-slate-500 mt-0.5">
-                          {dog.breed} • {dog.location} • Fee: R {dog.listing_price_zar.toLocaleString("en-ZA")}
+                          {dog.breed} • {dog.location} • Fee: R{" "}
+                          {dog.listing_price_zar.toLocaleString("en-ZA")}
                         </div>
                         <div className="text-[11px] text-slate-400 mt-0.5">
-                          Rehomer: {dog.rehomer_name || "Community Foster"} ({dog.rehomer_email || "N/A"})
+                          Rehomer: {dog.rehomer_name || "Community Foster"} (
+                          {dog.rehomer_email || "N/A"})
                         </div>
                       </div>
                     </div>
@@ -316,7 +344,6 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex items-center gap-2">
                       {app.status === "pending_admin" && (
                         <>
@@ -346,7 +373,6 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Environment details expander */}
                   <div className="rounded-2xl bg-slate-50 p-4 border border-slate-200/70 text-xs text-slate-600 space-y-1.5">
                     <div>
                       <strong>Housing: </strong> {app.housing_type} • Yard fenced:{" "}
@@ -408,7 +434,6 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Escrow Release Button */}
                   <div>
                     {tx.status === "held_in_escrow" ? (
                       <button
@@ -491,6 +516,136 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: VACCINE SUBSIDY GRANTS & ANTI-FRAUD QUEUE */}
+        {activeTab === "incentives" && (
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5 text-rose-600" />
+                  <h2 className="text-base font-bold text-slate-900">
+                    Bark Back Community Vaccine Grants (Anti-Fraud Vetting)
+                  </h2>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Strictly review SASSA proof, income documentation, and South African ID Luhn checks.
+                  Direct non-cash clinic vouchers are issued upon approval.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-extrabold text-amber-800 border border-amber-300">
+                  Pool: R {donationPoolStats.total_donated_zar.toLocaleString("en-ZA")}
+                </span>
+                <Link
+                  href="/donate"
+                  className="rounded-xl bg-amber-500 px-3 py-1 text-xs font-bold text-white hover:bg-amber-600 shadow-xs"
+                >
+                  View Donor Wall
+                </Link>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {vaccineIncentives
+                .filter((app) =>
+                  adminSearch
+                    ? app.applicant_name.toLowerCase().includes(adminSearch.toLowerCase()) ||
+                      app.sa_id_number.includes(adminSearch) ||
+                      app.pet_name.toLowerCase().includes(adminSearch.toLowerCase())
+                    : true
+                )
+                .map((grant) => (
+                  <div
+                    key={grant.id}
+                    className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 space-y-3"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-slate-900">{grant.id}</span>
+                          <span className="font-bold text-slate-900">
+                            {grant.pet_name} ({grant.pet_breed})
+                          </span>
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                              grant.status === "voucher_issued" || grant.status === "approved"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : grant.status === "declined"
+                                ? "bg-rose-100 text-rose-800"
+                                : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {grant.status === "voucher_issued" ? "Voucher Issued" : grant.status}
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-slate-600 mt-1">
+                          Applicant: <strong>{grant.applicant_name}</strong> • SA ID:{" "}
+                          <span className="font-mono font-bold text-slate-800">{grant.sa_id_number}</span> •{" "}
+                          {grant.city} ({grant.residential_address})
+                        </div>
+
+                        <div className="text-xs text-slate-500 mt-1 flex flex-wrap gap-2 items-center">
+                          <span className="rounded-md bg-white border border-slate-200 px-2 py-0.5 font-semibold text-slate-700">
+                            Category: {grant.income_bracket.replace(/_/g, " ").toUpperCase()}
+                          </span>
+                          <span>•</span>
+                          <span>Assigned Clinic: <strong>{grant.preferred_partner_clinic}</strong></span>
+                        </div>
+                      </div>
+
+                      {/* Review Buttons */}
+                      <div className="flex flex-wrap items-center gap-2 self-start">
+                        {grant.status === "pending_review" ? (
+                          <>
+                            <button
+                              onClick={() => reviewVaccineIncentive(grant.id, "voucher_issued")}
+                              className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700"
+                            >
+                              Approve & Issue SAVC Voucher (R 350)
+                            </button>
+                            <button
+                              onClick={() => reviewVaccineIncentive(grant.id, "declined", "Declined: Insufficient means verification.")}
+                              className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100"
+                            >
+                              Flag Fraud / Decline
+                            </button>
+                          </>
+                        ) : grant.voucher_code ? (
+                          <Link
+                            href={`/vaccine-incentive/voucher/${grant.id}`}
+                            className="rounded-xl bg-purple-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-purple-800 flex items-center gap-1"
+                          >
+                            <span>View Non-Cash Voucher</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </Link>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {/* Hardship note & Document Inspection */}
+                    <div className="rounded-xl bg-white p-3.5 border border-slate-200 text-xs text-slate-600 space-y-2">
+                      <p className="italic text-slate-700">"{grant.hardship_reason}"</p>
+                      <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-2 text-[11px]">
+                        <span className="text-slate-400">Attached Proofs:</span>
+                        <span className="flex items-center gap-1 text-brand-700 font-semibold underline">
+                          <FileText className="h-3 w-3" /> {grant.proof_of_income_doc}
+                        </span>
+                        <span className="flex items-center gap-1 text-brand-700 font-semibold underline">
+                          <FileCheck className="h-3 w-3" /> {grant.proof_of_residence_doc}
+                        </span>
+                        <span className="flex items-center gap-1 text-emerald-700 font-bold ml-auto">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Anti-Fraud Sworn Declaration Signed
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         )}
